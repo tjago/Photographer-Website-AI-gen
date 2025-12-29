@@ -105,8 +105,15 @@ const App = () => {
           </div>
         </nav>
 
-        <section className="h-[50vh] flex flex-col justify-center items-center text-center px-4 relative pt-20">
-          <div className="relative z-10">
+        <section className="h-[75vh] flex flex-col justify-center items-center text-center px-4 relative pt-20">
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-52 h-32 md:w-72 md:h-44 rounded-full border border-cyan-400/30 p-1 mb-10 shadow-[0_0_50px_rgba(34,211,238,0.2)] animate-in fade-in zoom-in duration-1000 overflow-hidden">
+              <img 
+                src="https://images.unsplash.com/photo-1554080353-a576cf803bda?auto=format&fit=crop&w=600&q=80" 
+                alt="Photographer" 
+                className="w-full h-full object-cover rounded-full grayscale hover:grayscale-0 transition-all duration-1000 scale-[1.05] hover:scale-110"
+              />
+            </div>
             <h1 className="text-6xl md:text-8xl font-light tracking-tighter animate-in slide-in-from-bottom-12 duration-1000 text-white">
               Visual <span className="serif italic text-cyan-400">Archives</span>
             </h1>
