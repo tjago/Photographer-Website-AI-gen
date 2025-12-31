@@ -21,6 +21,43 @@ const App = () => {
     return url;
   };
 
+  const parseGalleryText = (text) => {
+    const lines = text.split(/\r?\n/);
+    const albumMap = {};
+    const regex = /\[\s*(.*?)\s*\]\s*.*?\s*:\s*(https?:\/\/\S+)/i;
+    
+    lines.forEach((line, index) => {
+      const match = line.trim().match(regex);
+      if (match) {
+        const albumName = match[1].trim();
+        const rawUrl = match[2].trim();
+        const photoUrl = transformDriveUrl(rawUrl);
+        
+        if (!albumMap[albumName]) {
+          albumMap[albumName] = [];
+        }
+        
+        albumMap[albumName].push({
+          id: `photo-${index}`,
+          url: photoUrl,
+          alt: `${albumName} photography piece ${albumMap[albumName].length + 1}`
+        });
+      }
+    });
+
+    const albumEntries = Object.entries(albumMap);
+    if (albumEntries.length === 0) return null;
+
+    return albumEntries.map(([name, photos]) => ({
+      id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      title: name,
+      subtitle: `${photos.length} captures`,
+      coverImage: photos[0].url,
+      description: `Exploring the essence of ${name} through high-resolution photography.`,
+      photos: photos
+    }));
+  };
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
@@ -31,64 +68,50 @@ const App = () => {
     const loadDynamicGalleries = async () => {
       setIsLoading(true);
       setError(null);
+      
+      let fetchedText = null;
+      let dataSource = 'remote';
+
       try {
+        // Attempt 1: Remote Google Drive via Proxy
         const fileId = '13Ls_10OGXOPa3ZOJdDrqf1HmagjfzUG-';
         const directUrl = `https://docs.google.com/uc?export=download&id=${fileId}`;
         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
         
         const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error('Source file could not be fetched.');
+        if (!response.ok) throw new Error('Remote source unavailable.');
         
         const text = await response.text();
-        
         if (text.includes('<!DOCTYPE html>')) {
-           throw new Error('Received HTML instead of text. The file might be restricted or require a virus scan bypass.');
+           throw new Error('Remote source returned HTML instead of raw text.');
         }
-
-        const lines = text.split(/\r?\n/);
-        const albumMap = {};
-        const regex = /\[\s*(.*?)\s*\]\s*.*?\s*:\s*(https?:\/\/\S+)/i;
+        fetchedText = text;
+      } catch (remoteErr) {
+        console.warn("Remote Gallery Sync Failed, attempting local fallback:", remoteErr.message);
         
-        lines.forEach((line, index) => {
-          const match = line.trim().match(regex);
-          if (match) {
-            const albumName = match[1].trim();
-            const rawUrl = match[2].trim();
-            const photoUrl = transformDriveUrl(rawUrl);
-            
-            if (!albumMap[albumName]) {
-              albumMap[albumName] = [];
-            }
-            
-            albumMap[albumName].push({
-              id: `photo-${index}`,
-              url: photoUrl,
-              alt: `${albumName} photography piece ${albumMap[albumName].length + 1}`
-            });
-          }
-        });
-
-        const albumEntries = Object.entries(albumMap);
-        if (albumEntries.length === 0) {
-          throw new Error('No valid albums found. Please check your data source.');
+        try {
+          // Attempt 2: Local Fallback
+          const localResponse = await fetch('./File_URL_List.txt');
+          if (!localResponse.ok) throw new Error('Local fallback file not found.');
+          fetchedText = await localResponse.text();
+          dataSource = 'local';
+        } catch (localErr) {
+          console.error("All data sources failed.");
+          setError('Could not establish connection to image library (Remote & Local sources failed).');
+          setIsLoading(false);
+          return;
         }
-
-        const dynamicGalleries = albumEntries.map(([name, photos]) => ({
-          id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          title: name,
-          subtitle: `${photos.length} captures`,
-          coverImage: photos[0].url,
-          description: `Exploring the essence of ${name} through high-resolution photography.`,
-          photos: photos
-        }));
-
-        setGalleries(dynamicGalleries);
-      } catch (err) {
-        console.error("Gallery Sync Error:", err);
-        setError(err.message || 'An unexpected error occurred.');
-      } finally {
-        setIsLoading(false);
       }
+
+      const parsedGalleries = parseGalleryText(fetchedText);
+      if (!parsedGalleries) {
+        setError('The library file was found but contained no valid gallery entries.');
+      } else {
+        setGalleries(parsedGalleries);
+        console.log(`Successfully loaded ${parsedGalleries.length} galleries from ${dataSource} source.`);
+      }
+      
+      setIsLoading(false);
     };
 
     loadDynamicGalleries();
@@ -125,7 +148,7 @@ const App = () => {
           ${isLoading ? html`
             <div className="flex flex-col items-center justify-center py-40 space-y-8">
               <div className="w-10 h-10 border-2 border-cyan-500/10 border-t-cyan-400 rounded-full animate-spin"></div>
-              <p className="text-[10px] uppercase tracking-[0.4em] text-cyan-400/60 animate-pulse">Parsing Remote Library</p>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-cyan-400/60 animate-pulse">Syncing Visual Library</p>
             </div>
           ` : error ? html`
             <div className="flex flex-col items-center justify-center py-40 text-center max-w-lg mx-auto bg-white/5 rounded-3xl p-12 border border-white/5">
