@@ -16,9 +16,27 @@
         }
         .serif { font-family: 'Cormorant Garamond', serif; }
         
-        .masonry { column-count: 1; column-gap: 1.5rem; }
-        @media (min-width: 768px) { .masonry { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry { column-count: 3; } }
+        /* Grid-based layout for reliable row-by-row display */
+        .gallery-grid { 
+            display: grid;
+            gap: 2.5rem;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        
+        /* Tablets: 2 columns */
+        @media (min-width: 640px) { 
+            .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } 
+        }
+        
+        /* Standard Desktops: 3 columns (strictly enforced) */
+        @media (min-width: 1024px) { 
+            .gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } 
+        }
+        
+        /* Ultra Wide Screens: 4 columns for balance */
+        @media (min-width: 1800px) { 
+            .gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } 
+        }
 
         .no-scrollbar::-webkit-scrollbar {
             display: none;

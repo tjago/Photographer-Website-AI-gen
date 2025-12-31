@@ -97,11 +97,9 @@ const App = () => {
   return html`
     <div className="min-h-screen text-slate-200">
       ${!selectedGallery && html`
-        <nav className=${`fixed top-0 w-full z-50 flex justify-between items-center px-8 py-6 transition-all duration-500 ${scrolled ? 'bg-[#011627]/95 backdrop-blur-xl border-b border-white/5 shadow-2xl' : 'mix-blend-difference'}`}>
-          <div className="text-xl font-semibold tracking-tighter text-white">SALTY ESSENCE</div>
-          <div className="space-x-8 text-sm uppercase tracking-[0.2em] hidden md:flex text-white">
-            <button className="hover:text-cyan-400 transition" onClick=${() => window.scrollTo({top: 0, behavior: 'smooth'})}>Portfolio</button>
-            <a href="#" className="hover:text-cyan-400 transition">Contact</a>
+        <nav className=${`fixed top-0 w-full z-50 flex justify-end items-center px-8 py-6 transition-all duration-500 ${scrolled ? 'bg-[#011627]/95 backdrop-blur-xl border-b border-white/5 shadow-2xl' : 'mix-blend-difference'}`}>
+          <div className="text-sm uppercase tracking-[0.2em] hidden md:flex text-white">
+            <a href="mailto:example@example.com" className="hover:text-cyan-400 transition">Contact</a>
           </div>
         </nav>
 
@@ -111,7 +109,7 @@ const App = () => {
               <img 
                 src="https://images.unsplash.com/photo-1554080353-a576cf803bda?auto=format&fit=crop&w=600&q=80" 
                 alt="Photographer" 
-                className="w-full h-full object-cover rounded-full grayscale hover:grayscale-0 transition-all duration-1000 scale-[1.05] hover:scale-110"
+                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-[1.05] hover:scale-110"
               />
             </div>
             <h1 className="text-6xl md:text-8xl font-light tracking-tighter animate-in slide-in-from-bottom-12 duration-1000 text-white">
@@ -123,7 +121,7 @@ const App = () => {
           </div>
         </section>
 
-        <main className="max-w-7xl mx-auto px-6 pb-32">
+        <main className="w-full px-6 md:px-12 pb-32">
           ${isLoading ? html`
             <div className="flex flex-col items-center justify-center py-40 space-y-8">
               <div className="w-10 h-10 border-2 border-cyan-500/10 border-t-cyan-400 rounded-full animate-spin"></div>
@@ -144,11 +142,11 @@ const App = () => {
               </button>
             </div>
           ` : html`
-            <div className="masonry">
+            <div className="gallery-grid">
               ${galleries.map((gallery, index) => html`
                 <div 
                   key=${gallery.id} 
-                  className="gallery-item group animate-in fade-in slide-in-from-bottom-8 duration-1000 mb-8 break-inside-avoid"
+                  className="group animate-in fade-in slide-in-from-bottom-8 duration-1000"
                   style=${{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
                   onClick=${() => setSelectedGallery(gallery)}
                 >
@@ -181,7 +179,8 @@ const App = () => {
 
         <footer className="border-t border-white/5 py-32 text-center opacity-20">
           <p className="text-[10px] tracking-[0.6em] uppercase">
-            Dynamic Portfolio System &bull; 2025
+            All Rights Reserved.<br />
+            Copying of images without permission prohibited.
           </p>
         </footer>
       `}
